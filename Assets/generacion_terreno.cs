@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 public class generacion_terreno : MonoBehaviour
@@ -19,7 +20,9 @@ public class generacion_terreno : MonoBehaviour
     private int yellowTileCount;
     private int tileToGenerate = 0;
     private int resetHowManyWhite;
-    int num;
+    public float perlinNoiseScale;
+    public float separation;
+    float z;
 
     // Start is called before the first frame update
     void Start()
@@ -51,13 +54,17 @@ public class generacion_terreno : MonoBehaviour
         {
             for (int y = 0; y < columns; y++)
             {
-                num = UnityEngine.Random.Range(0, 10);
+               //z = Mathf.PerlinNoise(Time.time, y);
+               z = CalcNoise(y, x);
+
+              print(z);
+
                 if (x >= 0 && x < 3 && y >= 0 && y < 3)
                 {
                     tileToGenerate = 1;
                     CheckTile(tileToGenerate);
                     GameObject obj;
-                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, num, y), Quaternion.identity);
+                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, z, y), Quaternion.identity);
                     obj.transform.parent = transform;
                 }
                 else if (x == rows - 1 && y == columns - 1)
@@ -65,7 +72,7 @@ public class generacion_terreno : MonoBehaviour
                     tileToGenerate = 0;
                     greenTileCount++;
                     GameObject obj;
-                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, num, y), Quaternion.identity);
+                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, z, y), Quaternion.identity);
                     obj.transform.parent = transform;
                 }
                 else if (x >= rows - 3 && y >= columns - 3)
@@ -73,16 +80,16 @@ public class generacion_terreno : MonoBehaviour
                     tileToGenerate = 1;
                     CheckTile(tileToGenerate);
                     GameObject obj;
-                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, num, y), Quaternion.identity);
+                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, z, y), Quaternion.identity);
                     obj.transform.parent = transform;
                 }
                 else
                 {
-                    Vector3 pos = new Vector3(x, num, y);
+                    Vector3 pos = new Vector3(x, z, y);
                     tileToGenerate = Random.Range(0, 5);
                     CheckTile(tileToGenerate);
                     GameObject obj;
-                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, num, y), Quaternion.identity);
+                    obj = Instantiate(tiles[tileToGenerate], new Vector3(x, z, y), Quaternion.identity);
                     obj.transform.parent = transform;
                 }
 
@@ -162,5 +169,26 @@ public class generacion_terreno : MonoBehaviour
                 howManyWhite--;
                 break;
         }
+    }
+
+    float CalcNoise(int y2, int x2)
+    {
+        // For each pixel in the texture...
+        float y = 0.0F;
+        float sample = 0.0F;
+
+        while (y < y2)
+        {
+            float x = 0.0F;
+            while (x < x2)
+            {
+                float xCoord =  x / perlinNoiseScale;
+                float yCoord =  y / perlinNoiseScale;
+                sample = Mathf.PerlinNoise(xCoord, yCoord) * separation;
+                x++;
+            }
+            y++;
+        }
+        return sample;
     }
 }
